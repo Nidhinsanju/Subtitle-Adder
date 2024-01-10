@@ -1,54 +1,75 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BACKEND_URL } from "./Constents/api";
 import "./App.css";
 
 function DashBoard() {
-  const navigate = useNavigate("");
+  const navigate = useNavigate();
   const [video, setVideo] = useState(null);
-
-  const [text, setText] = useState("");
-  const symbol = "-->";
-
+  const [text, setText] = useState({});
+  const [view, setView] = useState("");
+  const token = localStorage.getItem("token");
+  const CustomerID = localStorage.getItem("CustomerID");
   const fileupload = (event) => {
     const file = event.target.files?.[0];
+    setVideo(file);
     if (file) {
       const videoURL = URL.createObjectURL(file);
-      setVideo(videoURL);
+      setView(videoURL);
     }
   };
 
   const textsave = (event) => {
-    setText(event.target.value);
+    const sub = event.target.value;
+    const textBlob = new Blob([sub], { type: "text/vtt" });
+    setText(textBlob);
   };
 
-  const fileSave = () => {
-    axios
-      .post(BACKEND_URL + "/getdata", { text })
-      .then((response) => {
-        console.log(response.status);
-        console.log("File saved on the server:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error saving file on the server:", error);
+  const fileSave = async () => {
+    const formData = new FormData();
+    formData.append("video", video);
+    formData.append("subtitle", text);
+    formData.append("CustomerID", CustomerID);
+
+    try {
+      const response = await axios.post(BACKEND_URL + "/getdata", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
-  };
-
-  const addSub = () => {
-    navigate("/addSub/");
+      if (response.status !== 200) {
+        console.log(response);
+        console.log("not able to save files");
+      } else {
+        console.log("Upload response:", response.data);
+      }
+    } catch (error) {
+      console.error("Error uploading:", error);
+    }
   };
 
   return (
     <div>
       <header>
+        <button
+          onClick={() => {
+            localStorage.setItem("CustomerID", null);
+            localStorage.setItem("token", null);
+            navigate("/login");
+          }}
+        >
+          Logut
+        </button>
+        <br />
         <input type="file" accept="video/*" onChange={fileupload}></input>
         Video Preview
       </header>
       <main>
         <video width="640" height="360" controls>
-          {video && <source src={video} type="video/mp4" />}
+          {video && <source src={view} type="video/mp4" />}
         </video>
       </main>
       <br />

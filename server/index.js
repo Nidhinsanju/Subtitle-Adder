@@ -1,18 +1,21 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { User, Videos } from "./database/index.js";
+import { User, OutputVid, ExtSub, ExtVideos, Cart } from "./database/index.js";
 import jwt from "jsonwebtoken";
 import authenticateJwt, { SECRET } from "./middleware/auth.js";
+import multer from "multer";
 
 const app = express();
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage }).fields([
+  { name: "video", maxCount: 1 },
+  { name: "subtitle", maxCount: 1 },
+]);
 
 app.use(cors());
 app.use(express.json());
-
-// app.get("/", (req, res) => {
-//   res.status(200).json({ message: "hi" });
-// });
+app.use(express.urlencoded({ extended: true }));
 
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
@@ -48,13 +51,46 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/addsub", authenticateJwt, async (req, res) => {
-  const { videoSrc, subSrc } = req.body;
-  res.status(200).json({ message: "hy itss okay" });
-  const videoData = req.body.video;
-  console.log(videoData);
-});
+// app.post("/getdata1", async (req, res) => {
+//   const videoSrc = req.body.video;
+//   const subSrc = req.body.text;
+//   res.status(200).json({ message: "hy itss okay" });
+// });
 
+app.post("/getdata", upload, authenticateJwt, async (req, res) => {
+  const video = req.files.video[0];
+  const text = req.files.subtitle[0];
+  const CustomerId = req.body.CustomerID;
+  const user = await User.findOne({ CustomerId });
+  const cart = await Cart.findOne({ CustomerId });
+  try {
+    if (cart) {
+      await cart.save();
+    }
+    if (!cart) {
+      const newcart = new Cart({ CustomerId });
+      await newcart.save();
+    }
+
+    if (video && text) {
+      const newVideo = new ExtVideos(video);
+      const newSub = new ExtSub(text);
+      cart.Video.push(newVideo);
+      cart.Subtitle.push(newSub);
+      await cart.save();
+      res.status(200).json({ Message: "saved" });
+      await user.save();
+    } else {
+      res.status(404).json({ message: "No input found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(304).json({ message: "not saved" });
+  }
+});
+//..........................................................................
+
+//.........................................................................
 mongoose.connect(
   "mongodb+srv://Nidhin_5656:TN37DB8220@cluster0.anuhjsu.mongodb.net/",
   {

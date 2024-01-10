@@ -8,11 +8,18 @@ import { BACKEND_URL } from "./Constents/api";
 import { useNavigate } from "react-router-dom";
 
 function Signup() {
-  const navigate = useNavigate;
+  const navigate = useNavigate();
   const [email, setmail] = useState("");
   const [password, setpassword] = useState("");
   return (
     <div>
+      <button
+        onClick={() => {
+          navigate("/login");
+        }}
+      >
+        Login
+      </button>
       <div
         style={{
           paddingTop: "250px",
