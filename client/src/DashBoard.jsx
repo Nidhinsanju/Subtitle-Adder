@@ -62,6 +62,7 @@ function DashBoard() {
           }
         );
         if (response.status !== 200) {
+          navigate("/error/");
           console.log(response);
           console.log("not able to save files");
         } else {
@@ -69,6 +70,7 @@ function DashBoard() {
           console.log("Upload response:", response.data);
         }
       } catch (error) {
+        navigate("/error/");
         console.error("Error uploading:", error);
       }
     } else {
@@ -87,6 +89,14 @@ function DashBoard() {
         >
           Logut
         </button>
+        <button
+          style={{ margin: "20px" }}
+          onClick={() => {
+            navigate("/cart/");
+          }}
+        >
+          Cart
+        </button>
         <br />
         <input type="file" accept="video/*" onChange={fileupload}></input>
         Video Preview
@@ -97,6 +107,7 @@ function DashBoard() {
         </video>
       </main>
       <br />
+
       <article>
         Add the subtitles as You want in the VTT file format
         <br />

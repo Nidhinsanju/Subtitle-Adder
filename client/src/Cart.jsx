@@ -7,6 +7,7 @@ function Cart() {
   const token = localStorage.getItem("token");
   const [video, setVideo] = useState("");
   const [view, setView] = useState("");
+  const [text, setText] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +40,7 @@ function Cart() {
           // });
         }
       } catch (error) {
+        navigate("/error/");
         console.log(error);
       }
     };
@@ -46,13 +48,13 @@ function Cart() {
   });
 
   return (
-    <div>
-      <header>
+    <div style={{ margin: "10%" }}>
+      <header style={{ margin: "13px" }}>
         <video width="640" height="360" controls>
           {video && <source src={view} type="video/mp4" />}
+          <track kind="captions" src={text} srcLang="en" label="english sub" />
         </video>
       </header>
-      <main></main>
     </div>
   );
 }

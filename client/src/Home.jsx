@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
-  const CustomerID = localStorage.getItem("CustomerID");
 
   return (
     <div>
@@ -17,17 +16,17 @@ function Home() {
       >
         <button
           onClick={() => {
-            navigate("/signup");
-          }}
-        >
-          Signup
-        </button>
-        <button
-          onClick={() => {
             navigate("/login");
           }}
         >
-          Login
+          login
+        </button>
+        <button
+          onClick={() => {
+            navigate("/Dashboard");
+          }}
+        >
+          Dashboard
         </button>
       </header>
 

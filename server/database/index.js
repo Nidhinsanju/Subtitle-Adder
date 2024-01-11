@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 
 const SubSchema = new mongoose.Schema({
-  extSubID: Number,
+  SubID: Number,
   name: String,
   data: Buffer,
   contentType: String,
 });
 
 const VideoSchema = new mongoose.Schema({
-  extvideID: Number,
+  videID: Number,
   name: String,
   data: String,
   contentType: String,
@@ -16,8 +16,16 @@ const VideoSchema = new mongoose.Schema({
 
 const cartSchema = new mongoose.Schema({
   CustomerId: Number,
-  Video: [VideoSchema],
-  Subtitle: [SubSchema],
+  Files: [
+    {
+      file: { type: mongoose.Schema.Types.ObjectId, ref: "Sub" }, // Reference to SubSchema
+      fileType: { type: String, enum: ["sub"] },
+    },
+    {
+      file: { type: mongoose.Schema.Types.ObjectId, ref: "Video" }, // Reference to VideoSchema
+      fileType: { type: String, enum: ["video"] },
+    },
+  ],
 });
 
 const userSchema = new mongoose.Schema({

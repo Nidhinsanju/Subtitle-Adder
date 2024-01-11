@@ -28,7 +28,7 @@ function Signup() {
           justifyContent: "center",
         }}
       >
-        <Typography>welcome to Shoeshop,Sign-up to continue</Typography>
+        <Typography>welcome to Converter,Sign-up to continue</Typography>
       </div>
       <div style={{ display: "flex", justifyContent: "center " }}>
         <Card variant="outlined" style={{ width: "400px", padding: "20px" }}>
