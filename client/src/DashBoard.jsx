@@ -35,8 +35,8 @@ function DashBoard() {
       const textBlob = new Blob([sub], { type: "text/vtt" });
       const reader = new FileReader();
       reader.onload = function (e) {
-        const baseVideo1 = e.target.result.split(",")[1];
-        setbinText(baseVideo1);
+        const basetext = e.target.result.split(",")[1];
+        setbinText(basetext);
       };
       reader.readAsDataURL(textBlob);
     }

@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   username: String,
   password: String,
   CustomerId: Number,
-  Cart: [cartSchema],
+  carts: [cartSchema],
 });
 
 //Define Mongoose Model

@@ -67,12 +67,10 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
   try {
     if (user) {
       let cart = await Cart.findOne({ CustomerId: CustomerID });
-
       if (!cart) {
         const newcart = new Cart({ CustomerId: CustomerID });
         await newcart.save();
       }
-
       if (bVideo && bText) {
         const decodedVideoData = Buffer.from(bVideo, "base64");
         const newVideo = new Video({
@@ -81,14 +79,14 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
           contentType: "video/mp4",
         });
 
-        cart.Video.push(newVideo);
+        // cart.Video.push(newVideo);
 
         const newSub = new Sub({
           name: "subtitle.vtt",
           data: bText,
           contentType: "text/vtt",
         });
-        cart.Subtitle.push(newSub);
+        // cart.Subtitle.push(newSub);
 
         await cart.save();
         await user.save();

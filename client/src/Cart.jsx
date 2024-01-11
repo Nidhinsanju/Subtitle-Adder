@@ -1,10 +1,12 @@
 import axios from "axios";
 import { BACKEND_URL } from "./Constents/api";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
   const customerID = localStorage.getItem("CustomerID");
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
   const [video, setVideo] = useState("");
   const [view, setView] = useState("");
   const [text, setText] = useState("");
@@ -40,7 +42,7 @@ function Cart() {
           // });
         }
       } catch (error) {
-        navigate("/error/");
+        // navigate("/error/");
         console.log(error);
       }
     };
