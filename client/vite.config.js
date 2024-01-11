@@ -10,7 +10,9 @@ export default defineConfig({
       enforce: "pre",
       transform(code, id) {
         if (id.endsWith(".vtt")) {
-          return `export default ${JSON.stringify(code)};`;
+          return {
+            code: `export default ${JSON.stringify(code)};`,
+          };
         }
       },
     },
