@@ -7,50 +7,74 @@ import "./App.css";
 
 function DashBoard() {
   const navigate = useNavigate();
-  const [video, setVideo] = useState(null);
-  const [text, setText] = useState({});
+  const [rawVideo, setrawVideo] = useState(null);
+  const [binText, setbinText] = useState("");
+  const [baseVideo, setbaseVideo] = useState("");
   const [view, setView] = useState("");
   const token = localStorage.getItem("token");
   const CustomerID = localStorage.getItem("CustomerID");
+
   const fileupload = (event) => {
     const file = event.target.files?.[0];
-    setVideo(file);
+    setrawVideo(file);
     if (file) {
       const videoURL = URL.createObjectURL(file);
       setView(videoURL);
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const baseVideo1 = e.target.result.split(",")[1];
+        setbaseVideo(baseVideo1);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const textsave = (event) => {
     const sub = event.target.value;
-    const textBlob = new Blob([sub], { type: "text/vtt" });
-    setText(textBlob);
-  };
-
-  const fileSave = async () => {
-    const formData = new FormData();
-    formData.append("video", video);
-    formData.append("subtitle", text);
-    formData.append("CustomerID", CustomerID);
-
-    try {
-      const response = await axios.post(BACKEND_URL + "/getdata", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.status !== 200) {
-        console.log(response);
-        console.log("not able to save files");
-      } else {
-        console.log("Upload response:", response.data);
-      }
-    } catch (error) {
-      console.error("Error uploading:", error);
+    if (sub) {
+      const textBlob = new Blob([sub], { type: "text/vtt" });
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const baseVideo1 = e.target.result.split(",")[1];
+        setbinText(baseVideo1);
+      };
+      reader.readAsDataURL(textBlob);
     }
   };
 
+  const fileSave = async () => {
+    if (rawVideo) {
+      const datatoSend = {
+        bVideo: baseVideo,
+        bText: binText,
+        CustomerID: CustomerID,
+      };
+
+      try {
+        const response = await axios.post(
+          BACKEND_URL + "/postdata",
+          datatoSend,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.status !== 200) {
+          console.log(response);
+          console.log("not able to save files");
+        } else {
+          navigate("/cart/");
+          console.log("Upload response:", response.data);
+        }
+      } catch (error) {
+        console.error("Error uploading:", error);
+      }
+    } else {
+      alert("No vidoe file Found");
+    }
+  };
   return (
     <div>
       <header>
@@ -69,7 +93,7 @@ function DashBoard() {
       </header>
       <main>
         <video width="640" height="360" controls>
-          {video && <source src={view} type="video/mp4" />}
+          {rawVideo && <source src={view} type="video/mp4" />}
         </video>
       </main>
       <br />
@@ -104,3 +128,17 @@ WEBVTT
 }
 
 export default DashBoard;
+
+// const formData = new FormData();
+// //covert the video file to Base64
+// const reader = new FileReader();
+// reader.onload = function (e) {
+//   const baseVideo = e.target.result.split(",")[1];
+//   formData.append("baseVideo", baseVideo);
+//   console.log(baseVideo);
+// };
+// reader.readAsDataURL(rawVideo);
+// //Save the text as binary file
+// formData.append("subtitle", binText);
+// formData.append("CustomerID", CustomerID);
+// saveFilesToServer(formData);
