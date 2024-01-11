@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     ReactRefresh(),
     react(),
+
     {
       name: "vite-plugin-vtt",
       enforce: "pre",
@@ -18,4 +19,7 @@ export default defineConfig({
       },
     },
   ],
+  build: {
+    outDir: "dist",
+  },
 });
