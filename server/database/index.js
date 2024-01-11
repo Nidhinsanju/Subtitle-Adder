@@ -1,28 +1,23 @@
-import mongoose, { mongo } from "mongoose";
-import { StrictMode } from "react";
+import mongoose from "mongoose";
 
-const extSubSchema = new mongoose.Schema({
+const SubSchema = new mongoose.Schema({
   extSubID: Number,
-  title: { type: String },
-  description: { type: String },
+  name: String,
+  data: Buffer,
+  contentType: String,
 });
 
-const extVideoSchema = new mongoose.Schema({
+const VideoSchema = new mongoose.Schema({
   extvideID: Number,
-  title: { type: String },
-  description: { type: String },
-  videoUrl: { type: String },
+  name: String,
+  data: String,
+  contentType: String,
 });
-const resultVideoSchema = new mongoose.Schema({
-  title: { type: String },
-  description: { type: String },
-  videoUrl: { type: String },
-});
+
 const cartSchema = new mongoose.Schema({
   CustomerId: Number,
-  Video: [extVideoSchema],
-  Subtitle: [extSubSchema],
-  Output: [resultVideoSchema],
+  Video: [VideoSchema],
+  Subtitle: [SubSchema],
 });
 
 const userSchema = new mongoose.Schema({
@@ -34,9 +29,8 @@ const userSchema = new mongoose.Schema({
 
 //Define Mongoose Model
 const User = mongoose.model("User", userSchema);
-const ExtVideos = mongoose.model("Videos", extVideoSchema);
-const ExtSub = mongoose.model("Subtitle", extSubSchema);
-const OutputVid = mongoose.model("Output", resultVideoSchema);
+const Video = mongoose.model("Video", VideoSchema);
+const Sub = mongoose.model("Subtitle", SubSchema);
 const Cart = mongoose.model("Cart", cartSchema);
 
-export { User, OutputVid, ExtSub, ExtVideos, Cart };
+export { User, Sub, Video, Cart };

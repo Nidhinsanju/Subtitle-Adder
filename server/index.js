@@ -1,25 +1,29 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { User, OutputVid, ExtSub, ExtVideos, Cart } from "./database/index.js";
+import { User, Sub, Video, Cart } from "./database/index.js";
 import jwt from "jsonwebtoken";
 import authenticateJwt, { SECRET } from "./middleware/auth.js";
+import bodyParser from "body-parser";
 import multer from "multer";
 
 const app = express();
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage }).fields([
-  { name: "video", maxCount: 1 },
-  { name: "subtitle", maxCount: 1 },
-]);
+// const storage = multer.memoryStorage();
+// const upload = multer({
+//   limits: { fieldSize: 2 * 1024 * 1024 },
+// }).fields([
+//   { name: "video", maxCount: 1 },
+//   { name: "subtitle", maxCount: 1 },
+// ]);
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ username });
+
   if (user) {
     res.status(403).json({ message: "User already exists" });
   } else {
@@ -57,35 +61,61 @@ app.post("/login", async (req, res) => {
 //   res.status(200).json({ message: "hy itss okay" });
 // });
 
-app.post("/getdata", upload, authenticateJwt, async (req, res) => {
-  const video = req.files.video[0];
-  const text = req.files.subtitle[0];
-  const CustomerId = req.body.CustomerID;
-  const user = await User.findOne({ CustomerId });
-  const cart = await Cart.findOne({ CustomerId });
+app.post("/postdata", authenticateJwt, async (req, res) => {
+  const { bVideo, bText, CustomerID } = req.body;
+  const user = await User.findOne({ CustomerId: CustomerID });
   try {
-    if (cart) {
-      await cart.save();
-    }
-    if (!cart) {
-      const newcart = new Cart({ CustomerId });
-      await newcart.save();
-    }
+    if (user) {
+      let cart = await Cart.findOne({ CustomerId: CustomerID });
 
-    if (video && text) {
-      const newVideo = new ExtVideos(video);
-      const newSub = new ExtSub(text);
-      cart.Video.push(newVideo);
-      cart.Subtitle.push(newSub);
-      await cart.save();
-      res.status(200).json({ Message: "saved" });
-      await user.save();
+      if (!cart) {
+        const newcart = new Cart({ CustomerId: CustomerID });
+        await newcart.save();
+      }
+
+      if (bVideo && bText) {
+        const decodedVideoData = Buffer.from(bVideo, "base64");
+        const newVideo = new Video({
+          name: "video.mp4",
+          data: decodedVideoData,
+          contentType: "video/mp4",
+        });
+
+        cart.Video.push(newVideo);
+
+        const newSub = new Sub({
+          name: "subtitle.vtt",
+          data: bText,
+          contentType: "text/vtt",
+        });
+        cart.Subtitle.push(newSub);
+
+        await cart.save();
+        await user.save();
+
+        res.status(200).json({ Message: "saved" });
+      } else {
+        res.status(404).json({ message: "No input found" });
+      }
     } else {
-      res.status(404).json({ message: "No input found" });
+      res.status(401).json({ message: "User not found" });
     }
   } catch (error) {
     console.log(error);
     res.status(304).json({ message: "not saved" });
+  }
+});
+
+app.post("/showdata", authenticateJwt, async (req, res) => {
+  const customerID = req.body.CustomerID;
+  const user = User.findOne({ customerID });
+  try {
+    if (user) {
+      const cart = await Cart.findOne({ customerID }).lean();
+      res.status(200).json({ cart });
+    }
+  } catch (error) {
+    res.status(304).json({ message: "internal server error", error });
   }
 });
 //..........................................................................
@@ -94,7 +124,7 @@ app.post("/getdata", upload, authenticateJwt, async (req, res) => {
 mongoose.connect(
   "mongodb+srv://Nidhin_5656:TN37DB8220@cluster0.anuhjsu.mongodb.net/",
   {
-    dbName: "Videouploader",
+    dbName: "Converter",
   }
 );
 
