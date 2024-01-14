@@ -5,22 +5,29 @@ import mongoose from "mongoose";
 import { User, Sub, Video, Cart } from "./database/index.js";
 import jwt from "jsonwebtoken";
 import authenticateJwt, { SECRET } from "./middleware/auth.js";
+import {
+  accessKeyId,
+  secretAccessKey,
+} from "../client/src/Constents/accessKey/key.js";
 // import { Logger } from "@aws-sdk/logger"; // Import the Logger class
 
 const app = express();
-
 app.use(cors());
+
+//For trasmitting the data
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true })); // Create a Logger instance
 
+//structuring the s3Object for sending data to cloud
 const s3 = new S3Client({
   region: "us-east-1",
   credentials: {
-    accessKeyId: "AKIA5SCI7IAH35UDDHOT",
-    secretAccessKey: "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",
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey,
   },
 });
 
+//Route for Signing up a New User
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ username });
@@ -40,6 +47,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+//Route for use to Login
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ username, password });
@@ -56,6 +64,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+//Route for getting data from the client
 app.post("/postdata", authenticateJwt, async (req, res) => {
   const { bVideo, bText, CustomerID } = req.body;
   const user = await User.findOne({ CustomerId: CustomerID });
@@ -80,6 +89,7 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
         );
 
         async function uploadToS3(fileBuffer, key, contentType) {
+          //function for uploading data to the cloud
           try {
             const params = {
               Bucket: "converterapp1",
@@ -99,6 +109,7 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
         }
 
         Cart.findOneAndUpdate(
+          //Replacing  the URL from cloud to the mongoDB using same index
           { CustomerId: CustomerID },
           {
             $set: {
@@ -130,6 +141,7 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
   }
 });
 
+//Route for Displaying data to the user
 app.post("/showdata", authenticateJwt, async (req, res) => {
   const customerID = req.body.CustomerID;
   const user = User.findOne({ customerID });
@@ -145,6 +157,8 @@ app.post("/showdata", authenticateJwt, async (req, res) => {
 //..........................................................................
 
 //.........................................................................
+
+// MongoDB model connection
 mongoose.connect(
   "mongodb+srv://Nidhin_5656:TN37DB8220@cluster0.anuhjsu.mongodb.net/",
   {
