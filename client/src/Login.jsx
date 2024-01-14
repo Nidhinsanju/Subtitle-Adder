@@ -77,9 +77,9 @@ function Login() {
               } catch (error) {
                 if (error.request) {
                   // The request was made but no response was received
-                  console.log(error.request);
+
                   alert("error");
-                  console.log(error);
+
                   return <div>Unexpected Server Error</div>;
                 }
               }

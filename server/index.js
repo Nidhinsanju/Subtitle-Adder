@@ -91,11 +91,10 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
             const command = new PutObjectCommand(params);
             const res = await s3.send(command);
 
-            console.log("File uploaded successfully in cloud");
             const baseUrl = `https://converterapp1.s3.amazonaws.com/`;
             return `${baseUrl}${key}`;
           } catch (error) {
-            console.log("error uploading in cloud");
+            res.status(500).json({ message: "error uploading in cloud" });
           }
         }
 
@@ -111,10 +110,12 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
         )
           .exec()
           .then((updatedCart) => {
-            console.log("Cart updated successfully:");
+            res.status(500).json({ message: "server errror" });
+            // console.log("Cart updated successfully:");
           })
           .catch((error) => {
-            console.error("Error updating cart:", error);
+            res.status(501).json({ message: "uploading catch error" });
+            // console.error("Error updating cart:", error);
           });
 
         res.status(200).json({ Message: "saved data", videoRef, subRef });
@@ -125,8 +126,7 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
       res.status(401).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log(error, "saving video error");
-    res.status(304).json({ message: "not saved" });
+    res.status(500).json({ message: "not saved" });
   }
 });
 

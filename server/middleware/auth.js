@@ -21,7 +21,6 @@ const authenticateJwt = (req, res, next) => {
       });
     }
   } catch (error) {
-    console.error("Error updating course:", error);
     res.status(500).json({ message: "Internal server error", error });
   }
 };

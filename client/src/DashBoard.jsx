@@ -62,16 +62,13 @@ function DashBoard() {
           }
         );
         if (response.status !== 200) {
+          alert("server Error");
           navigate("/error/");
-          console.log(response);
-          console.log("not able to save files");
         } else {
           navigate("/cart/");
-          console.log("Upload response:", response.data);
         }
       } catch (error) {
         navigate("/error/");
-        console.error("Error uploading:", error);
       }
     } else {
       alert("No vidoe file Found");

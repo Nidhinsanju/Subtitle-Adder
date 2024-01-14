@@ -79,7 +79,6 @@ function Signup() {
                 }
               } catch (error) {
                 if (error.response.status) {
-                  console.log(error.response.status);
                   alert("User already exists");
                   return <div>Unexpected Server Error!!</div>;
                 }
