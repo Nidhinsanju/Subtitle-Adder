@@ -3,36 +3,30 @@ import mongoose from "mongoose";
 const SubSchema = new mongoose.Schema({
   SubID: Number,
   name: String,
-  data: Buffer,
+  url: String, // Assuming this is a URL
   contentType: String,
 });
 
 const VideoSchema = new mongoose.Schema({
-  videID: Number,
+  videoID: Number,
   name: String,
-  data: String,
+  url: String, // Assuming this is a URL
   contentType: String,
 });
 
 const cartSchema = new mongoose.Schema({
   CustomerId: Number,
-  Files: [
-    {
-      file: { type: mongoose.Schema.Types.ObjectId, ref: "Sub" }, // Reference to SubSchema
-      fileType: { type: String, enum: ["sub"] },
-    },
-    {
-      file: { type: mongoose.Schema.Types.ObjectId, ref: "Video" }, // Reference to VideoSchema
-      fileType: { type: String, enum: ["video"] },
-    },
-  ],
+  Files: {
+    Video: String,
+    Subtitle: String,
+  },
 });
 
 const userSchema = new mongoose.Schema({
   username: String,
   password: String,
   CustomerId: Number,
-  carts: [cartSchema],
+  Carts: { type: mongoose.Schema.Types.ObjectId, ref: "Cart" },
 });
 
 //Define Mongoose Model

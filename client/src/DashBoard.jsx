@@ -115,8 +115,7 @@ function DashBoard() {
           <textarea
             style={{ padding: "5px" }}
             name="postContent"
-            defaultValue="Example:
-WEBVTT
+            defaultValue="WEBVTT
   
 1
 00:01.000 --> 00:04.000
@@ -139,17 +138,3 @@ WEBVTT
 }
 
 export default DashBoard;
-
-// const formData = new FormData();
-// //covert the video file to Base64
-// const reader = new FileReader();
-// reader.onload = function (e) {
-//   const baseVideo = e.target.result.split(",")[1];
-//   formData.append("baseVideo", baseVideo);
-//   console.log(baseVideo);
-// };
-// reader.readAsDataURL(rawVideo);
-// //Save the text as binary file
-// formData.append("subtitle", binText);
-// formData.append("CustomerID", CustomerID);
-// saveFilesToServer(formData);

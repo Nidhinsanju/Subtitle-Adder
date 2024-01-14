@@ -7,10 +7,11 @@ function Cart() {
   const customerID = localStorage.getItem("CustomerID");
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
-  const [video, setVideo] = useState("");
-  const [view, setView] = useState("");
+  const [video, setVideo] = useState();
+  const [s3vid, setS3vid] = useState("");
+  const [s3sub, setS3sub] = useState("");
+  // const [view, setView] = useState("");
   const [text, setText] = useState("");
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -27,34 +28,50 @@ function Cart() {
           }
         );
         if (response.status !== 200) {
+          alert("error fetching data");
           console.log("error");
         } else {
-          const src = response.data;
-          // console.log(src.cart.Video[0].data);
-          // const data1 = src.cart.Video[0].data;
-
-          if (data1) {
-            const videoURL = URL.createObjectURL(data1);
-            setView(videoURL);
+          const src = response.data.cart.Files;
+          if (src) {
+            setS3sub(src.Subtitle);
+            setS3vid(src.Video);
+          } else {
+            console.log("data undefined");
           }
-          // src.video?.map((data) => {
-          //   console.log(data.cart.cart);
-          // });
         }
       } catch (error) {
-        // navigate("/error/");
+        navigate("/error/");
         console.log(error);
       }
+      console.log(s3vid, s3sub);
     };
     fetchData();
   });
 
   return (
-    <div style={{ margin: "10%" }}>
+    <div>
+      <button
+        style={{ margin: "10px" }}
+        onClick={() => {
+          localStorage.setItem("CustomerID", null);
+          localStorage.setItem("token", null);
+          navigate("/login");
+        }}
+      >
+        Logut
+      </button>
+      <button
+        style={{ margin: "10px" }}
+        onClick={() => {
+          navigate("/Dashboard");
+        }}
+      >
+        Dashboard
+      </button>
       <header style={{ margin: "13px" }}>
         <video width="640" height="360" controls>
-          {video && <source src={view} type="video/mp4" />}
-          <track kind="captions" src={text} srcLang="en" label="english sub" />
+          {video && <source src={s3videoUrl} type="video/mp4" />}
+          <track kind="captions" src={s3sub} srcLang="en" label="english sub" />
         </video>
       </header>
     </div>

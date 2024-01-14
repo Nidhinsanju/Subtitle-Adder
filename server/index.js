@@ -1,24 +1,25 @@
 import express from "express";
 import cors from "cors";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import mongoose from "mongoose";
 import { User, Sub, Video, Cart } from "./database/index.js";
 import jwt from "jsonwebtoken";
 import authenticateJwt, { SECRET } from "./middleware/auth.js";
-import bodyParser from "body-parser";
-import multer from "multer";
+// import { Logger } from "@aws-sdk/logger"; // Import the Logger class
 
 const app = express();
-// const storage = multer.memoryStorage();
-// const upload = multer({
-//   limits: { fieldSize: 2 * 1024 * 1024 },
-// }).fields([
-//   { name: "video", maxCount: 1 },
-//   { name: "subtitle", maxCount: 1 },
-// ]);
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true })); // Create a Logger instance
+
+const s3 = new S3Client({
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: "AKIA5SCI7IAH35UDDHOT",
+    secretAccessKey: "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",
+  },
+});
 
 app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
@@ -55,43 +56,68 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// app.post("/getdata1", async (req, res) => {
-//   const videoSrc = req.body.video;
-//   const subSrc = req.body.text;
-//   res.status(200).json({ message: "hy itss okay" });
-// });
-
 app.post("/postdata", authenticateJwt, async (req, res) => {
   const { bVideo, bText, CustomerID } = req.body;
   const user = await User.findOne({ CustomerId: CustomerID });
   try {
     if (user) {
-      let cart = await Cart.findOne({ CustomerId: CustomerID });
+      const cart = await Cart.findOne({ CustomerId: CustomerID });
+      const cartId = cart ? cart.CartID : undefined;
       if (!cart) {
         const newcart = new Cart({ CustomerId: CustomerID });
         await newcart.save();
       }
+
       if (bVideo && bText) {
-        const decodedVideoData = Buffer.from(bVideo, "base64");
-        const newVideo = new Video({
-          name: "video.mp4",
-          data: decodedVideoData,
-          contentType: "video/mp4",
-        });
+        const videoKey = `${CustomerID}/video.mp4`;
+        const subtitleKey = `${CustomerID}/subtitle.vtt`;
 
-        // cart.Video.push(newVideo);
+        const videoRef = await uploadToS3(bVideo, videoKey, "video/mp4");
+        const subRef = await uploadToS3(
+          Buffer.from(bText, "base64"),
+          subtitleKey,
+          "text/vtt"
+        );
 
-        const newSub = new Sub({
-          name: "subtitle.vtt",
-          data: bText,
-          contentType: "text/vtt",
-        });
-        // cart.Subtitle.push(newSub);
+        async function uploadToS3(fileBuffer, key, contentType) {
+          try {
+            const params = {
+              Bucket: "converterapp1",
+              Key: key,
+              Body: fileBuffer,
+              ContentType: contentType,
+            };
 
-        await cart.save();
-        await user.save();
+            const command = new PutObjectCommand(params);
+            const res = await s3.send(command);
 
-        res.status(200).json({ Message: "saved" });
+            console.log("File uploaded successfully in cloud");
+            const baseUrl = `https://converterapp1.s3.amazonaws.com/`;
+            return `${baseUrl}${key}`;
+          } catch (error) {
+            console.log("error uploading in cloud");
+          }
+        }
+
+        Cart.findOneAndUpdate(
+          { CustomerId: CustomerID },
+          {
+            $set: {
+              "Files.Subtitle": subRef,
+              "Files.Video": videoRef,
+            },
+          },
+          { new: true, upsert: true }
+        )
+          .exec()
+          .then((updatedCart) => {
+            console.log("Cart updated successfully:");
+          })
+          .catch((error) => {
+            console.error("Error updating cart:", error);
+          });
+
+        res.status(200).json({ Message: "saved data", videoRef, subRef });
       } else {
         res.status(404).json({ message: "No input found" });
       }
@@ -99,7 +125,7 @@ app.post("/postdata", authenticateJwt, async (req, res) => {
       res.status(401).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log(error);
+    console.log(error, "saving video error");
     res.status(304).json({ message: "not saved" });
   }
 });

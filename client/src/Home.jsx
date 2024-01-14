@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
+  const CustomerID = localStorage.getItem("CustomerID");
 
   return (
     <div>
@@ -19,11 +20,16 @@ function Home() {
             navigate("/login");
           }}
         >
-          login
+          Login
         </button>
         <button
           onClick={() => {
-            navigate("/Dashboard");
+            if (CustomerID) {
+              navigate("/Dashboard/");
+            } else {
+              alert("Login to Continue");
+              navigate("/login/");
+            }
           }}
         >
           Dashboard

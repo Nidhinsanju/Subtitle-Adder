@@ -6,6 +6,7 @@ import Login from "./Login";
 import Signup from "./SignUp";
 import Home from "./Home";
 import Cart from "./Cart";
+import Apptest from "./Apptest";
 import PageError from "./PageError";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/dashboard/" element={<DashBoard />} />
           <Route path="/cart/" element={<Cart />} />
           <Route path="/error/" element={<PageError />} />
+          <Route path="/apptest/" element={<Apptest />} />
         </Routes>
       </Router>
     </div>
